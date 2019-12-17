@@ -140,7 +140,7 @@ func (s *ProjectService) GetByName(name string) (*Project, error) {
 
 func (s *ProjectService) Rename(id string, name string) error {
 	locator := LocatorID(id).String()
-	_, err := s.restHelper.putTextPlain(locator, name, "project")
+	_, err := s.restHelper.putTextPlain(locator + "/name", name, "project")
 	if err != nil {
 		return err
 	}
