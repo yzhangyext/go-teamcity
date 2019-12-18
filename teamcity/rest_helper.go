@@ -147,7 +147,7 @@ func (r *restHelper) putTextPlain(path string, data string, resourceDescription 
 		return string(bodyBytes), nil
 	}
 
-	return "", r.handleRestError(bodyBytes, resp.StatusCode, "PUT", resourceDescription)
+	return req.URL.Path, r.handleRestError(bodyBytes, resp.StatusCode, "PUT", resourceDescription)
 }
 
 func (r *restHelper) post(path string, data interface{}, out interface{}, resourceDescription string) error {
