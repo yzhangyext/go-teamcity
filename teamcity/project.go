@@ -4,7 +4,6 @@ package teamcity
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -141,9 +140,9 @@ func (s *ProjectService) GetByName(name string) (*Project, error) {
 
 func (s *ProjectService) Rename(id string, name string) error {
 	locator := LocatorID(id).String()
-	url, err := s.restHelper.putTextPlain(locator + "/name", name, "project")
+	_, err := s.restHelper.putTextPlain(locator + "/name", name, "project name")
 	if err != nil {
-		return errors.New(fmt.Sprintf("url: %v, err: %v", url, err))
+		return err
 	}
 	return nil
 }
