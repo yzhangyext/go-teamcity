@@ -81,13 +81,9 @@ func (bf *CommonBuildFeature) UnmarshalJSON(data []byte) error {
 		disabled = NewFalse()
 	}
 	bf.disabled = *disabled
-	
+
 	if aux.Properties != nil {
 		bf.properties = NewProperties(aux.Properties.Items...)
-	}
-
-	if v, ok := bf.properties.GetOk("vcsRootId"); ok {
-		bf.vcsRootID = v
 	}
 
 	return nil
