@@ -89,15 +89,16 @@ func (bf *CommonBuildFeature) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func NewCommonBuildFeature(featureType string, propertiesRaw []map[string]string) (*CommonBuildFeature, error) {
+func NewCommonBuildFeature(featureType string, propertiesRaw []interface {}) (*CommonBuildFeature, error) {
 	properties := NewPropertiesEmpty()
 	for _, propertyRaw := range propertiesRaw {
 		var name, value string
 		var ok bool
-		if name, ok = propertyRaw["name"]; !ok {
+		propertyMap := propertyRaw.(map[string]interface{})
+		if name, ok = propertyMap["name"].(string); !ok {
 			return nil, errors.New("missing name in property")
 		}
-		if value, ok = propertyRaw["value"]; !ok {
+		if value, ok = propertyMap["value"].(string); !ok {
 			return nil, errors.New("missing value in property")
 		}
 		properties.Add(&Property{
