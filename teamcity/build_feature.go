@@ -48,13 +48,16 @@ type BuildFeatureService struct {
 	BuildTypeID string
 	httpClient  *http.Client
 	base        *sling.Sling
+	restHelper *restHelper
 }
 
 func newBuildFeatureService(buildTypeID string, c *http.Client, base *sling.Sling) *BuildFeatureService {
+	slingName := base.New().Path(fmt.Sprintf("buildTypes/%s/features/", buildTypeID))
 	return &BuildFeatureService{
 		BuildTypeID: buildTypeID,
 		httpClient:  c,
-		base:        base.New().Path(fmt.Sprintf("buildTypes/%s/features/", buildTypeID)),
+		base:        slingName,
+		restHelper:  newRestHelperWithSling(c, slingName),
 	}
 }
 
@@ -107,6 +110,29 @@ func (s *BuildFeatureService) GetByID(id string) (BuildFeature, error) {
 	return s.readBuildFeatureResponse(resp)
 }
 
+func (s *BuildFeatureService) GetBuildFeatures() ([]BuildFeature, error) {
+	var aux Features
+	err := s.restHelper.get("", &aux, "build features")
+	if err != nil {
+		return nil, err
+	}
+
+	buildFeatures := make([]BuildFeature, aux.Count)
+
+	for i := range aux.Items{
+		dt, err := json.Marshal(aux.Items[i])
+		if err != nil {
+			return nil, err
+		}
+
+		var cbf CommonBuildFeature
+		err = cbf.UnmarshalJSON(dt)
+		buildFeatures[i] = &cbf
+	}
+
+	return buildFeatures, nil
+}
+
 //Delete removes a build feature from the build configuration by its id.
 func (s *BuildFeatureService) Delete(id string) error {
 	request, _ := s.base.New().Delete(id).Request()
@@ -128,6 +154,28 @@ func (s *BuildFeatureService) Delete(id string) error {
 		return fmt.Errorf("Error '%d' when deleting build feature: %s", response.StatusCode, string(respData))
 	}
 
+	return nil
+}
+
+// DeleteAll removes all build features of a build configuration
+func (s *BuildFeatureService) DeleteAll() error {
+	emptyStruct := struct{}{}
+	req, err := s.base.New().Put("").BodyJSON(emptyStruct).Request()
+
+	if err != nil {
+		return err
+	}
+
+	resp, err := s.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("Error when removing build features, statusCode: %d", resp.StatusCode)
+	}
 	return nil
 }
 
