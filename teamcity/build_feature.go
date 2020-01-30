@@ -200,7 +200,11 @@ func (s *BuildFeatureService) readBuildFeatureResponse(resp *http.Response) (Bui
 
 		out = &csp
 	default:
-		return nil, fmt.Errorf("Unsupported build feature type: '%s' (id:'%s') for buildTypeID: %s", payload.Type, payload.ID, s.BuildTypeID)
+		var cbf CommonBuildFeature
+		if err := cbf.UnmarshalJSON(bodyBytes); err != nil {
+			return nil, err
+		}
+		return out, nil
 	}
 
 	out.SetBuildTypeID(s.BuildTypeID)
