@@ -125,8 +125,11 @@ func (s *BuildFeatureService) GetBuildFeatures() ([]BuildFeature, error) {
 			return nil, err
 		}
 
-		var cbf CommonBuildFeature
+		cbf := CommonBuildFeature{}
 		err = cbf.UnmarshalJSON(dt)
+		if err != nil {
+			return nil, err
+		}
 		buildFeatures[i] = &cbf
 	}
 
